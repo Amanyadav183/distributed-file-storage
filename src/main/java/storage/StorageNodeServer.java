@@ -123,6 +123,22 @@ public class StorageNodeServer {
 
                 break;
 
+            case "INCREMENT":
+
+                if (parts.length < 2) {
+                    writer.println("ERROR|Invalid INCREMENT request");
+                    return;
+                }
+
+                String incrementFileName = parts[1];
+
+                int newValue =
+                storageNode.increment(incrementFileName);
+
+                writer.println("OK|" + newValue);
+
+                break;
+
             default:
 
                 writer.println(

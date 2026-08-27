@@ -54,6 +54,14 @@ public class StorageClient {
         );
     }
 
+    public String increment(String fileName)
+            throws Exception {
+
+        return sendRequest(
+                "INCREMENT|" + fileName
+        );
+    }
+
     public String delete(String fileName)
             throws Exception {
 

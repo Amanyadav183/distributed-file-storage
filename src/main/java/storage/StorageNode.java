@@ -3,10 +3,14 @@ package storage;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class StorageNode {
 
     private final Path storageDirectory;
+
+    private final ConcurrentHashMap<String, Object> fileLocks =
+        new ConcurrentHashMap<>();
 
     public StorageNode(String directory) throws IOException {
         storageDirectory = Path.of(directory);
@@ -52,4 +56,46 @@ public class StorageNode {
 
         System.out.println("Deleted file: " + fileName);
     }
+    public int increment(String fileName) throws IOException {
+
+    Object lock = fileLocks.computeIfAbsent(
+            fileName,
+            key -> new Object()
+    );
+
+    synchronized (lock) {
+
+        Path filePath = storageDirectory.resolve(fileName);
+
+        int currentValue = 0;
+
+        if (Files.exists(filePath)) {
+
+            String content =
+                    Files.readString(filePath).trim();
+
+            if (!content.isEmpty()) {
+                currentValue = Integer.parseInt(content);
+            }
+        }
+
+        int newValue = currentValue + 1;
+
+        Files.writeString(
+                filePath,
+                String.valueOf(newValue)
+        );
+
+        System.out.println(
+                "Atomically incremented " +
+                fileName +
+                ": " +
+                currentValue +
+                " -> " +
+                newValue
+        );
+
+        return newValue;
+    }
+}
 }
