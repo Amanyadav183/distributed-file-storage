@@ -40,6 +40,20 @@ public class StorageNodeManager {
         return nodes.size();
     }
 
+    public List<StorageNode> getAvailableNodes() {
+
+        List<StorageNode> availableNodes = new ArrayList<>();
+
+        for (int i = 0; i < nodes.size(); i++) {
+
+            if (nodeAvailability.get(i)) {
+                availableNodes.add(nodes.get(i));
+            }
+        }
+
+        return availableNodes;
+    }
+
     public boolean isNodeAvailable(int index) {
         return nodeAvailability.get(index);
     }

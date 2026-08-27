@@ -13,6 +13,24 @@ public class StorageNodeManagerTest {
                 "Total nodes: " + manager.getNodeCount()
         );
 
+        System.out.println(
+            "Available nodes: " + manager.getAvailableNodes().size()
+        );
+
+        manager.setNodeAvailability(1, false);
+
+        System.out.println(
+            "Available nodes after Node 2 failure: "
+            + manager.getAvailableNodes().size()
+        );
+
+        manager.setNodeAvailability(1, true);
+
+        System.out.println(
+            "Available nodes after Node 2 recovery: "
+            + manager.getAvailableNodes().size()
+        );
+
         StorageNode node1 = manager.getNode(0);
 
         node1.put(
