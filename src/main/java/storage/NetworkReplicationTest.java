@@ -20,7 +20,10 @@ public class NetworkReplicationTest {
                         node3
                 );
 
-        // Step 1: Replicate file to all nodes
+        System.out.println("=== NETWORK FAILURE TEST ===");
+        System.out.println();
+
+        // Step 1: Write file
         replication.put(
                 "replicated.txt",
                 "This file is replicated across network nodes."
@@ -28,56 +31,56 @@ public class NetworkReplicationTest {
 
         System.out.println();
 
-        System.out.println(
-                "Node 1: " +
-                node1.get("replicated.txt")
-        );
-
-        System.out.println(
-                "Node 2: " +
-                node2.get("replicated.txt")
-        );
-
-        System.out.println(
-                "Node 3: " +
-                node3.get("replicated.txt")
-        );
-
-        // Step 2: Simulate Node 2 losing its replica
-        System.out.println();
-        System.out.println(
-                "Simulating Node 2 data loss..."
-        );
-
-        node2.delete("replicated.txt");
-
+        // Step 2: Check Node 1
         try {
 
-            node2.get("replicated.txt");
+            System.out.println(
+                    "Node 1: " +
+                    node1.get("replicated.txt")
+            );
 
         } catch (Exception e) {
 
             System.out.println(
-                    "Node 2 missing file: " +
+                    "Node 1 unavailable: " +
                     e.getMessage()
             );
         }
 
-        // Step 3: Resynchronize Node 2 from the primary
+        // Step 3: Check Node 2
+        try {
+
+            System.out.println(
+                    "Node 2: " +
+                    node2.get("replicated.txt")
+            );
+
+        } catch (Exception e) {
+
+            System.out.println(
+                    "Node 2 unavailable: " +
+                    e.getMessage()
+            );
+        }
+
+        // Step 4: Check Node 3
+        try {
+
+            System.out.println(
+                    "Node 3: " +
+                    node3.get("replicated.txt")
+            );
+
+        } catch (Exception e) {
+
+            System.out.println(
+                    "Node 3 unavailable: " +
+                    e.getMessage()
+            );
+        }
+
         System.out.println();
-
-        replication.resyncReplica(
-                0,
-                "replicated.txt"
-        );
-
-        // Step 4: Verify recovered replica
-        System.out.println();
-
-        System.out.println(
-                "Node 2 after resynchronization: " +
-                node2.get("replicated.txt")
-        );
+        System.out.println("=== FAILURE TEST COMPLETED ===");
 
         replication.shutdown();
     }
