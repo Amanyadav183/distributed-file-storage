@@ -1,6 +1,9 @@
 # Java compiled files
 *.class
 
+# Compiled output
+out/
+
 # Maven
 target/
 
@@ -9,3 +12,6 @@ target/
 
 # VS Code
 .vscode/
+
+# Generated storage data
+*-data/
