@@ -24,38 +24,63 @@ public class StorageNode {
 
     public void put(String fileName, byte[] data) throws IOException {
 
-        Path filePath = storageDirectory.resolve(fileName);
+        Object lock = fileLocks.computeIfAbsent(
+                fileName,
+                key -> new Object()
+        );
 
-        Files.write(filePath, data);
+        synchronized (lock) {
 
-        System.out.println("Stored file: " + fileName);
+            Path filePath = storageDirectory.resolve(fileName);
+
+            Files.write(filePath, data);
+
+            System.out.println("Stored file: " + fileName);
+        }
     }
 
     public byte[] get(String fileName) throws IOException {
 
-        Path filePath = storageDirectory.resolve(fileName);
+        Object lock = fileLocks.computeIfAbsent(
+                fileName,
+                key -> new Object()
+        );
 
-        if (!Files.exists(filePath)) {
-            throw new IOException("File not found: " + fileName);
+        synchronized (lock) {
+
+            Path filePath = storageDirectory.resolve(fileName);
+
+            if (!Files.exists(filePath)) {
+                throw new IOException("File not found: " + fileName);
+            }
+
+            System.out.println("Reading file: " + fileName);
+
+            return Files.readAllBytes(filePath);
         }
-
-        System.out.println("Reading file: " + fileName);
-
-        return Files.readAllBytes(filePath);
     }
 
     public void delete(String fileName) throws IOException {
 
-        Path filePath = storageDirectory.resolve(fileName);
+        Object lock = fileLocks.computeIfAbsent(
+                fileName,
+                key -> new Object()
+        );
 
-        if (!Files.exists(filePath)) {
-            throw new IOException("File not found: " + fileName);
+        synchronized (lock) {
+
+            Path filePath = storageDirectory.resolve(fileName);
+
+            if (!Files.exists(filePath)) {
+                throw new IOException("File not found: " + fileName);
+            }
+
+            Files.delete(filePath);
+
+            System.out.println("Deleted file: " + fileName);
         }
-
-        Files.delete(filePath);
-
-        System.out.println("Deleted file: " + fileName);
     }
+
     public int increment(String fileName) throws IOException {
 
     Object lock = fileLocks.computeIfAbsent(
