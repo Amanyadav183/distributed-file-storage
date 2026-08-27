@@ -40,39 +40,108 @@ public class StorageNodeServer {
 
     private void handleClient(Socket socket) {
 
-        try (
-                BufferedReader reader =
-                        new BufferedReader(
-                                new InputStreamReader(socket.getInputStream())
+    try (
+            BufferedReader reader =
+                    new BufferedReader(
+                            new InputStreamReader(socket.getInputStream())
+                    );
+
+            PrintWriter writer =
+                    new PrintWriter(
+                            socket.getOutputStream(),
+                            true
+                    )
+    ) {
+
+        String request = reader.readLine();
+
+        if (request == null || request.isBlank()) {
+            writer.println("ERROR|Empty request");
+            return;
+        }
+
+        System.out.println("Received request: " + request);
+
+        String[] parts = request.split("\\|", 3);
+
+        String command = parts[0];
+
+        switch (command) {
+
+            case "PUT":
+
+                if (parts.length < 3) {
+                    writer.println("ERROR|Invalid PUT request");
+                    return;
+                }
+
+                String putFileName = parts[1];
+                String content = parts[2];
+
+                storageNode.put(
+                        putFileName,
+                        content.getBytes(java.nio.charset.StandardCharsets.UTF_8)
+                );
+
+                writer.println("OK|PUT");
+
+                break;
+
+            case "GET":
+
+                if (parts.length < 2) {
+                    writer.println("ERROR|Invalid GET request");
+                    return;
+                }
+
+                String getFileName = parts[1];
+
+                byte[] data = storageNode.get(getFileName);
+
+                String fileContent =
+                        new String(
+                                data,
+                                java.nio.charset.StandardCharsets.UTF_8
                         );
 
-                PrintWriter writer =
-                        new PrintWriter(
-                                socket.getOutputStream(),
-                                true
-                        )
-        ) {
+                writer.println("OK|" + fileContent);
 
-            String request = reader.readLine();
+                break;
 
-            System.out.println(
-                    "Received request: " + request
-            );
+            case "DELETE":
 
-            writer.println("ACK: " + request);
+                if (parts.length < 2) {
+                    writer.println("ERROR|Invalid DELETE request");
+                    return;
+                }
 
-        } catch (Exception e) {
+                String deleteFileName = parts[1];
 
-            System.err.println(
-                    "Client handling failed: " + e.getMessage()
-            );
+                storageNode.delete(deleteFileName);
 
-        } finally {
+                writer.println("OK|DELETE");
 
-            try {
-                socket.close();
-            } catch (Exception ignored) {
-            }
+                break;
+
+            default:
+
+                writer.println(
+                        "ERROR|Unknown command: " + command
+                );
+        }
+
+    } catch (Exception e) {
+
+        System.err.println(
+                "Client handling failed: " + e.getMessage()
+        );
+
+    } finally {
+
+        try {
+            socket.close();
+        } catch (Exception ignored) {
         }
     }
+}
 }
