@@ -20,37 +20,65 @@ public class NetworkReplicationTest {
                         node3
                 );
 
+        // Step 1: Replicate file to all nodes
         replication.put(
                 "replicated.txt",
                 "This file is replicated across network nodes."
         );
 
+        System.out.println();
+
         System.out.println(
-        "Node 1: " +
-        node1.get("replicated.txt")
-);
+                "Node 1: " +
+                node1.get("replicated.txt")
+        );
 
-try {
+        System.out.println(
+                "Node 2: " +
+                node2.get("replicated.txt")
+        );
 
-    System.out.println(
-            "Node 2: " +
-            node2.get("replicated.txt")
-    );
+        System.out.println(
+                "Node 3: " +
+                node3.get("replicated.txt")
+        );
 
-} catch (Exception e) {
+        // Step 2: Simulate Node 2 losing its replica
+        System.out.println();
+        System.out.println(
+                "Simulating Node 2 data loss..."
+        );
 
-    System.out.println(
-            "Node 2 is unavailable: " +
-            e.getMessage()
-    );
-}
+        node2.delete("replicated.txt");
 
-System.out.println(
-        "Node 3: " +
-        node3.get("replicated.txt")
-);
+        try {
+
+            node2.get("replicated.txt");
+
+        } catch (Exception e) {
+
+            System.out.println(
+                    "Node 2 missing file: " +
+                    e.getMessage()
+            );
+        }
+
+        // Step 3: Resynchronize Node 2 from the primary
+        System.out.println();
+
+        replication.resyncReplica(
+                0,
+                "replicated.txt"
+        );
+
+        // Step 4: Verify recovered replica
+        System.out.println();
+
+        System.out.println(
+                "Node 2 after resynchronization: " +
+                node2.get("replicated.txt")
+        );
 
         replication.shutdown();
-
     }
 }

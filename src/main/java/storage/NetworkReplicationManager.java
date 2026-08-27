@@ -79,6 +79,57 @@ public class NetworkReplicationManager {
         );
     }
 
+    public void resyncReplica(
+        int replicaIndex,
+        String fileName) throws Exception {
+
+    if (replicaIndex < 0 || replicaIndex >= replicas.length) {
+        throw new IllegalArgumentException(
+                "Invalid replica index: " + replicaIndex
+        );
+    }
+
+    System.out.println(
+            "Starting resynchronization for Node "
+                    + (replicaIndex + 2)
+    );
+
+    // Read the authoritative copy from the primary
+    String primaryResponse =
+            primary.get(fileName);
+
+    if (primaryResponse == null ||
+            !primaryResponse.startsWith("OK|")) {
+
+        throw new Exception(
+                "Primary could not provide file: " + fileName
+        );
+    }
+
+    String content =
+            primaryResponse.substring(3);
+
+    // Copy the missing data to the recovered replica
+    String replicaResponse =
+            replicas[replicaIndex].put(
+                    fileName,
+                    content
+            );
+
+    System.out.println(
+            "Resynchronization response from Node "
+                    + (replicaIndex + 2)
+                    + ": "
+                    + replicaResponse
+    );
+
+    System.out.println(
+            "Node "
+                    + (replicaIndex + 2)
+                    + " resynchronized successfully."
+    );
+}
+
     public void shutdown() {
 
         executor.shutdown();
